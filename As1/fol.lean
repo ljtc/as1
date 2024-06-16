@@ -1,7 +1,7 @@
 -- Lógica de primer orden
 
 /-
-En este caso sólo daremos algunas equivalencias que nos permitan
+Sólo daremos algunas equivalencias que nos permitan
 manejar fórmulas con cuantificadores.
 -/
 
@@ -12,6 +12,26 @@ section fol
 variable (α : Type) (p q : α → Prop)
 variable (r : Prop)
 
+--cuantificar x en algo donde no ocurre x lo deja igual
+example : (∃ x : α, r) → r := by
+  intro ⟨_, hr⟩
+  assumption
+
+example (a : α) : r → (∃ x : α, r) := by
+  intro hr
+  exact ⟨a, hr⟩
+
+example (a : α) : (∀ x : α, r) ↔ r := by
+  constructor
+  . intro h
+    exact h a
+  . intro hr _
+    assumption
+--
+
+
+
+-- ∀ con ∧
 example : (∀ x, p x ∧ q x) ↔ (∀ x, p x) ∧ (∀ x, q x) := by
   constructor
   . intro h
@@ -23,10 +43,29 @@ example : (∀ x, p x ∧ q x) ↔ (∀ x, p x) ∧ (∀ x, q x) := by
   . intro ⟨h, h'⟩ x
     exact ⟨h x, h' x⟩
 
-example : (∀ x, p x → q x) → (∀ x, p x) → (∀ x, q x) := by
+--consecuencia de lo anterior
+example (a : α) : (∀ x, p x ∧ r) ↔ (∀ x, p x) ∧ r := by
+  constructor
+  . intro h
+    constructor
+    . intro x
+      exact (h x).1
+    . exact (h a).2
+  . intro h x
+    exact ⟨(h.1) x, h.2⟩
+
+
+
+-- ∀ con →
+-- sólo se vale una implicación
+example : (∀ x, p x → q x) → ((∀ x, p x) → (∀ x, q x)) := by
   intro h h' a
   exact (h a) (h' a)
 
+
+
+-- ∀ con ∨
+-- sólo se vale una implicación
 example : (∀ x, p x) ∨ (∀ x, q x) → ∀ x, p x ∨ q x := by
   intro h a
   rcases h with hp | hq
@@ -35,19 +74,9 @@ example : (∀ x, p x) ∨ (∀ x, q x) → ∀ x, p x ∨ q x := by
   . right
     exact hq a
 
---con lógica clásica
 
-example : (∃ x : α, r) → r := by
-  intro ⟨_, hr⟩
-  assumption
 
-example (a : α) : r → (∃ x : α, r) := by
-  intro hr
-  exact ⟨a, hr⟩
-
-example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := by
-  exact exists_and_right
-
+-- ∃ con ∧ y una fórmula donde x no ocurre
 example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := by
   constructor
   . intro ⟨a, h⟩
@@ -58,6 +87,9 @@ example : (∃ x, p x ∧ r) ↔ (∃ x, p x) ∧ r := by
   . intro ⟨⟨a, hp⟩, hr⟩
     exact ⟨a, ⟨hp, hr⟩⟩
 
+
+
+-- ∃ con ∨
 example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := by
   constructor
   . intro ⟨a, hpq⟩
@@ -67,7 +99,7 @@ example : (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := by
     . right
       exact ⟨a, hq⟩
   . intro h
-    rcases h with ⟨a, hp⟩ | ⟨a, hq⟩ --(*)
+    rcases h with ⟨a, hp⟩ | ⟨a, hq⟩
     . exact ⟨a, Or.inl hp⟩
     . use a
       right
@@ -135,14 +167,6 @@ example (a : α) : (∃ x, r → p x) ↔ (r → ∃ x, p x) := by
     have : ∃ x, p x := h (h' a).1
     rcases this with ⟨b, hp⟩
     exact (h' b).2 hp
-
-example : α → ((∀ x : α, r) ↔ r) := by
-  intro a
-  constructor
-  . intro h
-    exact h a
-  . intro hr _
-    assumption
 
 
 example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r := by
