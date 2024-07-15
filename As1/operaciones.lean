@@ -144,7 +144,8 @@ example : A ∩ B = B ∩ A := by
   . intro ⟨xa, xb⟩
     constructor <;> assumption
   . intro ⟨xb, xa⟩
-    constructor <;> assumption
+    constructor
+    assumption'
 
 -- ∪ es conmutativa
 example : A ∪ B = B ∪ A := by
@@ -258,7 +259,7 @@ example : (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ := by
       obtain ⟨_, xb⟩ := h
       contradiction
 
--- ley de De Morgan 2 (lógica clásica)
+-- ley de De Morgan 2
 example : (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ := by
   ext x
   simp only [mem_compl_iff, mem_inter_iff]
